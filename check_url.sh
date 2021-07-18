@@ -1,4 +1,7 @@
 #!/bin/bash
+
+[ -f /etc/init.d/functions ] && . /etc/init.d/functions
+
 usage(){
     if [[ ! $1 =~ http://www.*com ]]
     then
@@ -7,16 +10,15 @@ usage(){
     fi
 }
 check_url(){
-    wget -q $1 &> /dev/null
-    retval=$?
-    if [ $retval -eq 0 ]
-    then
-        echo "url is OK."
-    else
-        echo "url is not OK."
-    fi
+	wget -q $1 &>/dev/null
+	retval=$?
+	if [ $retval -eq 0 ]
+	then
+	  action  "url is ok." /bin/true
+	else
+	  action "url is no." /bin/false
+	fi
 }
-
 main(){
     usage $1
     check_url $1
