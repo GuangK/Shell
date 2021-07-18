@@ -1,0 +1,8 @@
+#!/bin/sh
+PORT=`lsof -i :80 | wc -l`
+if [ $PORT -lt 1 ] 
+then
+    echo "Nginx is done!" | tee /tmp/nginx.log
+else
+    echo "Nginx is up."
+fi
