@@ -1,0 +1,14 @@
+[Unit]
+Description=Rsync service
+After=network.target
+ 
+[Service]
+Type=forking
+PIDFile=/var/run/rsyncd.pid
+ExecStart=/etc/rc.d/init.d/rsyncd start
+ExecReload=/etc/rc.d/init.d/rsyncd restart
+ExecStop=/etc/rc.d/init.d/rsyncd stop
+PrivateTmp=true
+ 
+[Install]
+WantedBy=multi-user.target
