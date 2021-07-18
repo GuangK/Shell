@@ -1,0 +1,38 @@
+#!/bin/bash
+# chkconfig: 2345 34 56
+# description: startup rsync scripts
+start(){
+	if [ -f /var/run/rsyncd.pid -a -s /var/run/rsyncd.pid ]
+	   then
+	       :
+	   else
+	       rsync --daemon
+	fi
+}
+stop(){
+    if [ -f /var/run/rsyncd.pid -a -s /var/run/rsyncd.pid ]
+    then
+        kill `cat /var/run/rsyncd.pid`
+    else
+        echo "Failed to stop rsync Unit rsync not loaded."
+        exit 1
+    fi
+
+}
+main(){
+	if [ "$1" = "start" ]
+	then
+	   start
+	elif [ "$1" = "stop" ]
+	then
+	   stop
+	elif [ "$1" = "restart" ]
+	then
+	   $0 stop
+	   sleep 2
+	   $0 start
+	else
+	    echo "Usage；$0 {start|stop|restart}"
+	fi
+}
+main $*
