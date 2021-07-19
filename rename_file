@@ -1,0 +1,15 @@
+#!/bin/sh
+
+DIR=/king
+
+if [ ! -d $DIR ]
+then
+    mkdir $DIR
+fi
+
+cd $DIR
+
+for file in `ls`
+do
+    mv $file ${file/red.HTML/king.html} &> /tmp/file.log
+done
