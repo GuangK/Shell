@@ -1,0 +1,88 @@
+#!/bin/bash
+# chkconfig: 2345 34 89
+# description: rsync service start and stop scripts
+# Author: alan
+# Organization: 
+[ -f /etc/rc.d/init.d/functions ] && source /etc/rc.d/init.d/functions
+lockdir='/var/lock/subsys'
+lock_file_path="$lockdir/rsync"
+rsyncd_pid_file_path="/var/run/rsyncd.pid"
+#成功提示函数
+log_success_msg(){
+    #action为特殊的提示函数，$@为所有参数。
+    action "SUCCESS! $@" /bin/true
+}
+#失败提示函数
+log_failure_msg(){
+    action  "ERROR! $@" /bin/false
+}
+start(){
+    rsync --daemon &>/dev/null
+    retval=$?
+    if [ $retval -eq 0 ]
+    then
+        log_success_msg "Rsyncd is started."
+        if test -w "$lockdir" #判断锁目录是否可写。
+        then
+            touch "$lock_file_path" #创建锁文件。
+            return $retval
+        else
+            log_failure_msg "Rsync lockfile denied" #调用失败函数提示。
+            return 1
+        fi
+    else
+        echo "Rsyncd startup fail."
+        return 1
+    fi
+}
+stop(){
+    if test -s "$rsyncd_pid_file_path"
+    then
+        #读取pidfile
+        rsyncd_pid=`cat "$rsyncd_pid_file_path"`
+      
+        if (kill -0 $rsyncd_pid 2>/dev/null)
+        then
+            kill $rsyncd_pid
+            retval=$?
+            if [ $retval -eq 0 ]
+            then
+                log_success_msg "Rsync Stop" #调用停止成功函数。
+                if test -f "$lock_file_path"
+                then
+                    rm "$lock_file_path"  #删除锁文件。
+                fi
+                return $retval
+            else
+                log_failure_msg "Rsyncd Stop."
+                return $retval
+            fi
+        else
+            log_failure_msg "rsync server_pid's process is not running!"
+            rm "$rsyncd_pid_file_path"
+        fi
+    else
+        log_failure_msg "Rsync server PID file is null or not exist!"
+        return 1
+    fi
+}
+case "$1" in
+    start)
+        start
+        retval=$?
+        ;;
+    stop)
+        stop
+        retval=$?
+        ;;
+    restart)
+        stop
+        sleep 2
+        start
+        retval=$?
+        ;;
+    *)
+        echo $"Usage:$0 {start|stop|restart}"
+        exit 1
+esac
+exit $retval
