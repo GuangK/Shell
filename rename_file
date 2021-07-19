@@ -11,5 +11,6 @@ cd $DIR
 
 for file in `ls`
 do
-    mv $file ${file/red.HTML/king.html} &> /tmp/file.log
+    #mv $file ${file/red.HTML/king.html} &> /tmp/file.log
+    rename "king.html" "KING.HTML" $file
 done
